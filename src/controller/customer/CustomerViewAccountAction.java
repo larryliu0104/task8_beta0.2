@@ -14,7 +14,7 @@ import model.TransactionDAO;
 import org.genericdao.RollbackException;
 import org.genericdao.Transaction;
 
-import com.google.gson.Gson;
+//import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import util.Log;
@@ -32,7 +32,8 @@ public class CustomerViewAccountAction extends Action {
 	private CustomerDAO customerDAO;
 	private TransactionDAO transactionDAO;
 	String message = "You don't have any funds at this time";
-
+	ArrayList<ViewPortfolio> listPort = new ArrayList<ViewPortfolio>();
+	JsonObject innerObject;
 	private static final String FORMAT_STRING = "#,##0.00";
 	private Model model;
 
@@ -56,9 +57,13 @@ public class CustomerViewAccountAction extends Action {
 		request.setAttribute("errors", errors);
 
 		try {
-
-			CustomerBean customer = (CustomerBean) request.getSession(false).getAttribute("customer");
+			innerObject = new JsonObject();
+			CustomerBean customer = (CustomerBean) request.getSession().getAttribute("customer");
 			customer = customerDAO.read(customer.getId());
+			if (customer == null) {
+				innerObject.addProperty("message", "You must log in prior to making this request");
+				return innerObject;
+			}
 			double currentAmount = Double.parseDouble(customer.getCashTwoDecimal());
 			double pendingAmount = (double) transactionDAO.getPendingAmount(customer.getId()) / 100.0;
 			double cash = currentAmount - pendingAmount;
@@ -75,11 +80,12 @@ public class CustomerViewAccountAction extends Action {
 				return innerObject;
 			}
 			ShareInformationBean[] shareList = model.getShares(customer.getId());
-			String lastTransactionDay = null;
+			// String lastTransactionDay = null;
 			FundPriceBean fundPrice = fundPriceDAO.getCurrentFundPrice(customer.getId());
 			double currentFundPrice = fundPrice.getPrice();
 
-			lastTransactionDay = transactionDAO.getUsersLastTransactionDay(customer.getId());
+			// lastTransactionDay =
+			// transactionDAO.getUsersLastTransactionDay(customer.getId());
 			/*
 			 * request.setAttribute("lastTransactionDay", lastTransactionDay);
 			 * request.setAttribute("shareList", shareList);
@@ -88,23 +94,29 @@ public class CustomerViewAccountAction extends Action {
 			for (int i = 0; i < shareList.length; i++) {
 				lstShareList.add(shareList[i]);
 			}
-			JsonObject innerObject = new JsonObject();
+
 			ViewPortfolio vpf = new ViewPortfolio();
-			for(int i = 0; i<shareList.length; i++) {
+			for (int i = 0; i < shareList.length; i++) {
 				vpf.setName(shareList[i].getFundName());
 				vpf.setShares(shareList[i].getShare());
 				vpf.setPrice(currentFundPrice);
-				
+
 			}
+			if (lstShareList.isEmpty()) {
+				innerObject.addProperty("message", message);
+			}
+			listPort.add(vpf);
+			String str = listPort.toString();
 			innerObject.addProperty("cash", cash);
-			innerObject.addProperty("message", message);
-			innerObject.addProperty("Funds", vpf.list.toString());
+
+			innerObject.addProperty("Funds", str);
 
 			return innerObject;
 		} catch (RollbackException e) {
 
 			errors.add(e.getMessage());
-			return null;
+			innerObject.addProperty("message", "I’m sorry you are not authorized to preform that action");
+			return innerObject;
 		} finally {
 			if (Transaction.isActive()) {
 				Transaction.rollback();
