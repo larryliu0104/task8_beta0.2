@@ -15,6 +15,8 @@ import org.genericdao.Transaction;
 import org.mybeans.form.FormBeanException;
 import org.mybeans.form.FormBeanFactory;
 
+import com.google.gson.JsonObject;
+
 import util.Log;
 import databean.CustomerBean;
 import databean.EmployeeBean;
@@ -42,10 +44,11 @@ public class LoginAction extends Action {
 		return NAME;
 	}
 
-	public String perform(HttpServletRequest request) {
+	public JsonObject perform(HttpServletRequest request) {
 
 		List<String> errors = new ArrayList<String>();
 		request.setAttribute("errors", errors);
+		JsonObject innerObject = new JsonObject();
 
 		try {
 
