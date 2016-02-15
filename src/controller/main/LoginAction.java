@@ -25,7 +25,7 @@ import formbean.LoginForm;
 public class LoginAction extends Action {
 
 	private static final String LOGIN_JSP = "login.jsp";
-	private static final String NAME = "login.do";
+	private static final String NAME = "login";
 	private static final String EMPLOYEE_VIEW = "employee_search_customer.do";
 	private static final String CUSTOMER_VIEW = "customer_viewaccount.do";
 
@@ -56,7 +56,8 @@ public class LoginAction extends Action {
 			request.setAttribute("form", form);
 
 			if (!form.isPresent()) {
-				return LOGIN_JSP;
+				innerObject.addProperty("message", "Sorry, the login information is not valid!!!");
+				return innerObject;
 			}
 
 			HttpSession session = request.getSession(true);
@@ -67,21 +68,27 @@ public class LoginAction extends Action {
 
 			errors.addAll(form.getValidationErrors());
 			if (errors.size() != 0) {
-				return LOGIN_JSP;
+				innerObject.addProperty("message", "Errors in login message, please check again!!!");
+				return innerObject;
 			}
 			if (form.isEmployee()) {
 				EmployeeBean employee = employeeDao.getEmployeeByUserName(form
 				    .getUserName());
 				if (employee == null) {
 					errors.add("User name not found");
-					return LOGIN_JSP;
+					innerObject.addProperty("message", "User name not found");
+					return innerObject;
 				}
 
 				if (!employee.getPassword().equals(form.getPassword())) {
 					errors.add("Incorrect password");
+					innerObject.addProperty("message", "The username/password combination"
+							+ "that you entered is not correct");
+					return innerObject;
 				}
 				if (errors.size() != 0) {
-					return LOGIN_JSP;
+					innerObject.addProperty("message", "Errors in login message, please check again!!!");
+					return innerObject;
 				}
 
 				request.getSession().setAttribute("employee", employee);
@@ -92,7 +99,10 @@ public class LoginAction extends Action {
 				        + " employe name is "
 				        + ((EmployeeBean) request.getSession().getAttribute("employee"))
 				            .getUserName());
-				return EMPLOYEE_VIEW;
+				innerObject.addProperty("message", "Welcome!!!" + 
+				            ((EmployeeBean) request.getSession().getAttribute("employee"))
+			            .getUserName());
+				return innerObject;
 			} else if (form.isCustomer()) {
 
 				CustomerBean customer = customerDAO.getCustomerByUserName(form
@@ -100,7 +110,8 @@ public class LoginAction extends Action {
 
 				if (customer == null) {
 					errors.add("User name not found");
-					return LOGIN_JSP;
+					innerObject.addProperty("message", "User name not found");
+					return innerObject;
 				}
 				System.out.println("customer name" + customer.getUserName());
 				System.out.println("customer:" + customer);
@@ -108,20 +119,25 @@ public class LoginAction extends Action {
 				System.out.println("form password" + form.getPassword());
 				if (!customer.getPassword().equals(form.getPassword())) {
 					errors.add("Incorrect password");
-					return LOGIN_JSP;
+					innerObject.addProperty("message", "The username/password combination"
+							+ "that you entered is not correct");
+					return innerObject;
 				}
 
 				request.getSession().setAttribute("customer", customer);
 
-				return CUSTOMER_VIEW;
+				innerObject.addProperty("message", "Welcome!!!");
+				return innerObject;
 			}
-			return "";
+			//return "";
 		} catch (RollbackException e) {
 			errors.add(e.getMessage());
-			return LOGIN_JSP;
+			innerObject.addProperty("message", "Errors in login message, please check again!!!");
+			return innerObject;
 		} catch (FormBeanException e) {
 			errors.add(e.getMessage());
-			return LOGIN_JSP;
+			innerObject.addProperty("message", "Errors in login message, please check again!!!");
+			return innerObject;
 		} finally {
 			if (Transaction.isActive()) {
 				Transaction.rollback();

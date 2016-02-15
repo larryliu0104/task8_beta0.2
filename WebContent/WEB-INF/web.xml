@@ -43,6 +43,14 @@
 		<servlet-name>favorites-controller</servlet-name>
 		<url-pattern>/viewPortfolio</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>favorites-controller</servlet-name>
+		<url-pattern>/login</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>favorites-controller</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
 
 
 	
