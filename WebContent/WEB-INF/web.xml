@@ -31,6 +31,18 @@
 		<servlet-name>favorites-controller</servlet-name>
 		<url-pattern>    /transitionDay                     </url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>favorites-controller</servlet-name>
+		<url-pattern>/requestCheck</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>favorites-controller</servlet-name>
+		<url-pattern>/buyFund</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>favorites-controller</servlet-name>
+		<url-pattern>/viewPortfolio</url-pattern>
+	</servlet-mapping>
 
 
 	
